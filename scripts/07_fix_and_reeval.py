@@ -1,27 +1,3 @@
-#!/usr/bin/env python3
-"""
-Fix and re-evaluate Whisper output using targeted post-processing (Q1-g).
-
-Reads error_samples.jsonl produced by 06_error_analysis.py, applies two
-post-processing fixes, and reports before/after WER on the targeted subset.
-
-Deliverable: results/fix_results.json
-
-Design notes vs the previous version:
-  - WER capping removed throughout. Preprocessing already ensures the
-    validation set does not contain the short/sparse utterances that produced
-    extreme WER outliers. Mean and median WER are reported; both are meaningful
-    on a clean dataset.
-  - dedup_repetition_loop() uses regex consecutive-run collapse (>=5
-    consecutive identical tokens) rather than a global frequency threshold.
-    This avoids incorrectly truncating legitimate adjacent repetitions in
-    normal Hindi speech.
-  - auto_build_phonetic_map() derives hyp->ref token pairs from observed
-    substitutions in error_samples.jsonl (MIN_PAIR_FREQ=2). Falls back to
-    curated seed list for pairs not seen in data.
-  - normalize_for_wer() is identical to 05_evaluate.py and 06_error_analysis.py:
-    NFC + danda collapse + whitespace.
-"""
 
 import os
 import sys
@@ -37,10 +13,6 @@ from collections import defaultdict
 import numpy as np
 import jiwer
 
-
-# ============================================================================
-# Paths
-# ============================================================================
 
 def get_repo_root() -> Path:
     return Path(__file__).parent.parent
@@ -64,10 +36,6 @@ logger = logging.getLogger(__name__)
 # Minimum frequency for a substitution pair to enter the auto-derived map.
 MIN_PAIR_FREQ = 2
 
-
-# ============================================================================
-# Text helpers
-# ============================================================================
 
 def normalize_for_wer(text: str) -> str:
     """
@@ -115,10 +83,6 @@ def dedup_repetition_loop(text: str) -> str:
     text = re.sub(r' {2,}', ' ', text).strip()
     return text
 
-
-# ============================================================================
-# Auto-derive phonetic map from error_samples.jsonl
-# ============================================================================
 
 def auto_build_phonetic_map(
     error_samples: List[Dict],
@@ -205,9 +169,6 @@ SEED_PHONETIC_MAP: Dict[str, str] = {
 }
 
 
-# ============================================================================
-# Fixer
-# ============================================================================
 
 class WhisperOutputFixer:
     """
@@ -254,10 +215,6 @@ class WhisperOutputFixer:
                 return True
         return False
 
-
-# ============================================================================
-# Main
-# ============================================================================
 
 def main():
     try:

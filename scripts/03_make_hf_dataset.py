@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Build HuggingFace datasets for training.
-
-FIXES vs previous version:
-  [1] Safe overwrite: TRAIN_DIR and VAL_DIR are wiped before saving so
-      re-runs don't append to or corrupt existing Arrow datasets.
-
-  [2] words_per_second logged in stats so we can verify the filter worked.
-"""
-
 import os
 import sys
 import json

@@ -1,26 +1,3 @@
-#!/usr/bin/env python3
-"""
-Error analysis for fine-tuned Whisper model (Q1-d and Q1-e).
-
-Runs the fine-tuned model over the validation set, systematically samples
->=25 error utterances, builds a data-driven error taxonomy with 3-5 examples
-per category, and writes two deliverables:
-  results/error_samples.jsonl   — sampled error records
-  results/error_taxonomy.md     — taxonomy report with recommendations
-
-Notes on design decisions vs the original version:
-  - WER capping removed: preprocessing already filters short/sparse/silent
-    segments, so the repetition-loop outlier problem that drove the capping
-    logic is no longer present in the validation set.
-  - is_repetition_loop threshold raised to 8 (was 5). With clean data, a
-    token appearing 5 times is more plausible as legitimate speech repetition
-    (e.g. "एक एक एक एक एक" in a countdown). 8 consecutive is clearly a loop.
-  - normalize_for_wer() is consistent with 05_evaluate.py: NFC + danda
-    collapse + whitespace only.
-  - All other logic (systematic_error_sampling, get_word_errors, taxonomy
-    classifier, generate_taxonomy_report) is unchanged — the categories
-    emerge from real substitution/deletion/insertion patterns in the data.
-"""
 
 import os
 import sys
@@ -41,10 +18,6 @@ import jiwer
 from tqdm import tqdm
 from collections import defaultdict
 
-
-# ============================================================================
-# Paths
-# ============================================================================
 
 def get_repo_root() -> Path:
     return Path(__file__).parent.parent
@@ -72,10 +45,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# GPU helpers
-# ============================================================================
-
 def setup_gpu(gpu_id: int = 0) -> None:
     if torch.cuda.is_available():
         total = torch.cuda.device_count()
@@ -97,17 +66,9 @@ def get_device(gpu_id: int = 0) -> torch.device:
     return torch.device(f"cuda:{gpu_id}")
 
 
-# ============================================================================
-# Text helpers
-# ============================================================================
 
 def normalize_for_wer(text: str) -> str:
-    """
-    Consistent with 05_evaluate.py:
-      1. Unicode NFC normalisation.
-      2. Collapse danda/period chains, strip trailing punctuation.
-      3. Collapse whitespace.
-    """
+    
     text = unicodedata.normalize("NFC", text)
     text = re.sub(r'[।\.]{2,}', '।', text)
     text = text.rstrip('।. ').strip()
@@ -123,15 +84,7 @@ def compute_wer_utterance(reference: str, hypothesis: str) -> float:
 
 
 def get_word_errors(reference: str, hypothesis: str) -> List[Dict]:
-    """
-    Word-level error list using SequenceMatcher.
-
-    Inside the 'replace' opcode, emits the correct type when one side of
-    the aligned span is shorter than the other:
-      - Both sides present → substitution
-      - Ref exhausted      → insertion
-      - Hyp exhausted      → deletion
-    """
+    
     from difflib import SequenceMatcher
 
     ref_words = reference.split()
@@ -221,10 +174,6 @@ def is_repetition_loop(hypothesis: str, threshold: int = 8) -> bool:
     return max(freq.values()) >= threshold
 
 
-# ============================================================================
-# Model loading
-# ============================================================================
-
 def load_model(gpu_id: int = 0):
     best = MODEL_DIR / "best"
     model_path = best
@@ -260,11 +209,6 @@ def load_model(gpu_id: int = 0):
     model  = model.to(device).eval()
     logger.info("Fine-tuned model loaded.")
     return model, processor, device
-
-
-# ============================================================================
-# Inference
-# ============================================================================
 
 def run_inference_all(
     model: WhisperForConditionalGeneration,
@@ -336,10 +280,6 @@ def run_inference_all(
 
     return results
 
-
-# ============================================================================
-# Systematic error sampling
-# ============================================================================
 
 def systematic_error_sampling(
     results: List[Dict],
@@ -431,11 +371,6 @@ def systematic_error_sampling(
     )
     return sampled, sampling_meta
 
-
-# ============================================================================
-# Error taxonomy
-# ============================================================================
-
 FUNCTION_WORDS = {
     "है", "का", "को", "में", "यह", "वह", "से", "की", "के",
     "पर", "तो", "भी", "ने", "ही", "तक", "पे", "ना", "हैं",
@@ -518,10 +453,6 @@ def analyze_error_patterns(error_samples: List[Dict]) -> Dict[str, List]:
 
     return categories
 
-
-# ============================================================================
-# Per-example reasoning
-# ============================================================================
 
 def generate_example_reasoning(sample: Dict, category: str) -> str:
     errors = sample.get("word_errors", [])
@@ -611,10 +542,6 @@ def generate_example_reasoning(sample: Dict, category: str) -> str:
         f"suggesting local lexical confusion."
     )
 
-
-# ============================================================================
-# Output helpers
-# ============================================================================
 
 def save_error_samples(error_samples: List[Dict]) -> None:
     with open(ERROR_SAMPLES_FILE, "w", encoding="utf-8") as f:
@@ -806,10 +733,6 @@ def generate_taxonomy_report(
 
     logger.info(f"Error taxonomy report saved -> {ERROR_TAXONOMY_FILE}")
 
-
-# ============================================================================
-# Main
-# ============================================================================
 
 def main():
     parser = argparse.ArgumentParser(

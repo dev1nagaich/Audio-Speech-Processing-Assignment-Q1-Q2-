@@ -1,21 +1,3 @@
-#!/usr/bin/env python3
-"""
-Q2: ASR Cleanup Pipeline for Hindi Conversational Speech
-=========================================================
-Two operations:
-  (a) Number Normalisation  — spoken Hindi number words → digits
-  (b) English Word Detection — tags English loanwords in Hindi transcripts
-
-Transcription guideline (from Q1):
-  English words spoken in conversation are transcribed in Devanagari script
-  (e.g. "computer" → "कंप्यूटर"). The Devanagari form is CORRECT; detection
-  identifies it as an English-origin loanword, not a transcription error.
-
-Usage:
-  python 08_cleanup_pipeline.py                     # runs demo on built-in examples
-  python 08_cleanup_pipeline.py --jsonl path/to/error_samples.jsonl
-  python 08_cleanup_pipeline.py --audio_dir path/to/segments --transcription_dir path/to/transcriptions
-"""
 
 import re
 import sys
@@ -37,10 +19,6 @@ logger = logging.getLogger(__name__)
 RESULTS_DIR = Path(__file__).parent.parent / "results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-
-# ============================================================================
-# (a)  NUMBER NORMALISATION
-# ============================================================================
 
 # ── Units (0-19) ────────────────────────────────────────────────────────────
 UNITS: Dict[str, int] = {
@@ -271,14 +249,6 @@ def normalise_numbers(text: str) -> Tuple[str, List[Dict]]:
     return " ".join(result_tokens), conversions
 
 
-# ============================================================================
-# (b)  ENGLISH WORD DETECTION
-# ============================================================================
-
-# ── Devanagari English loanword lexicon ─────────────────────────────────────
-# Curated list of high-frequency English loanwords that appear in the
-# JoshTalks conversational corpus, transcribed in Devanagari per the guideline.
-# Organised by domain for maintainability.
 
 _ENGLISH_LOANWORDS_DEVANAGARI: List[str] = [
     # Tech / devices
@@ -335,10 +305,6 @@ _LOANWORD_SET = set(_ENGLISH_LOANWORDS_DEVANAGARI)
 
 # Devanagari suffixes that, when stripped, may reveal a loanword root
 _DEVANAGARI_SUFFIXES = ['ों', 'ाओं', 'ियों', 'ों', 'ें', 'ो', 'ी', 'ा', 'े']
-
-# ── Phonological heuristics ──────────────────────────────────────────────────
-# English loanwords in Devanagari often contain specific sound clusters
-# rarely found in native Sanskrit-derived Hindi words.
 
 # Letter combinations characteristic of English origin
 _ENGLISH_PHONEME_PATTERNS: List[re.Pattern] = [
@@ -508,11 +474,6 @@ def tag_english_words(text: str) -> EnglishTagResult:
         english_count=len(english_words),
     )
 
-
-# ============================================================================
-# EVALUATION helpers
-# ============================================================================
-
 @dataclass
 class CleanupResult:
     """Per-utterance result of the full cleanup pipeline."""
@@ -604,14 +565,6 @@ def run_pipeline_on_sample(sample: Dict) -> CleanupResult:
     )
 
 
-# ============================================================================
-# DEMO  —  curated examples (since we cannot run live Whisper here)
-# ============================================================================
-
-# These examples are drawn from:
-#   (i)  the actual error_samples.jsonl references/hypotheses
-#   (ii) additional synthetic examples that illustrate the full range of
-#        number and English-detection scenarios found in JoshTalks data.
 
 DEMO_EXAMPLES: List[Dict] = [
     # ── Number normalisation: correct conversions ──────────────────────────
@@ -763,11 +716,6 @@ DEMO_EXAMPLES: List[Dict] = [
         "note": "सबजेक्ट (subject) → English loanword. ASR output सब्येक is a distortion of the same word.",
     },
 ]
-
-
-# ============================================================================
-# REPORTING
-# ============================================================================
 
 def _print_section(title: str, width: int = 80) -> None:
     print("\n" + "=" * width)
@@ -989,11 +937,6 @@ def generate_report(results: List[Tuple[CleanupResult, Dict]]) -> str:
     lines.append("")
 
     return "\n".join(lines)
-
-
-# ============================================================================
-# MAIN
-# ============================================================================
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Q2 ASR Cleanup Pipeline")

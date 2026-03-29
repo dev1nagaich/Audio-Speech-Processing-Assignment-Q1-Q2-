@@ -1,29 +1,3 @@
-#!/usr/bin/env python3
-"""
-Preprocess downloaded audio and transcriptions.
-
-FIXES vs previous version:
-  [1] words_per_second filter added: segments with < 0.8 words/sec are
-      discarded. These are backchannel/acknowledgment segments ("जी हां" in
-      5.8s, "हम्म" in 4.8s) that contain mostly silence or crosstalk bleed.
-      The model hallucinates full sentences on these, destroying WER.
-
-  [2] Safe overwrite: SEGMENTS_DIR is wiped and recreated, MANIFEST_FILE
-      is deleted before processing so re-runs start clean without stale data.
-
-  [3] Filler word filter tightened: removed the 2s duration exception.
-
-  [4] MIN_TEXT_LENGTH raised from 3 to 5 Devanagari code-points.
-
-  [5] Unicode NFC normalisation applied before length check.
-
-  [6] count_devanagari() helper used for meaningful content length.
-
-  [7] Punctuation-only filter.
-
-  [8] Segment-level snr_check() via RMS to skip near-silent segments.
-"""
-
 import os
 import sys
 import json
@@ -40,10 +14,6 @@ import librosa
 import soundfile as sf
 from tqdm import tqdm
 
-
-# ============================================================================
-# Setup
-# ============================================================================
 
 def get_repo_root() -> Path:
     return Path(__file__).parent.parent
@@ -80,10 +50,6 @@ MIN_RMS               = 0.002
 MIN_WORDS_PER_SECOND  = 0.8
 
 
-# ============================================================================
-# Audio helpers
-# ============================================================================
-
 def verify_and_resample_audio(audio_path: Path) -> Tuple[bool, int]:
     try:
         audio_data, sr = librosa.load(str(audio_path), sr=None, mono=True)
@@ -95,11 +61,6 @@ def verify_and_resample_audio(audio_path: Path) -> Tuple[bool, int]:
     except Exception as exc:
         logger.error(f"Error processing {audio_path.name}: {exc}")
         return False, 0
-
-
-# ============================================================================
-# Text helpers
-# ============================================================================
 
 def normalize_text(text: str) -> str:
     text = text.strip()
@@ -167,10 +128,6 @@ def should_include_segment(
     return True, None
 
 
-# ============================================================================
-# Segment processing
-# ============================================================================
-
 def process_recording(
     recording_id: int,
     audio_path: Path,
@@ -228,10 +185,6 @@ def process_recording(
         logger.error(f"Error processing recording {recording_id}:\n{traceback.format_exc()}")
         return 0, 0, 0.0
 
-
-# ============================================================================
-# Main
-# ============================================================================
 
 def preprocess_all() -> None:
     # FIX [2]: safe overwrite — wipe stale segments and manifest

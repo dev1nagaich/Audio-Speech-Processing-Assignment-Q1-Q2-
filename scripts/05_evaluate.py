@@ -1,22 +1,3 @@
-#!/usr/bin/env python3
-"""
-Evaluate Whisper-small (baseline vs fine-tuned) on FLEURS Hi test and
-JoshTalks validation set.
-
-Preprocessing (02_preprocess.py) already enforces:
-  - MIN_WORDS_PER_SECOND = 0.8   (filters sparse/backchannel segments)
-  - MIN_DEVANAGARI_CHARS = 5     (filters filler-only utterances)
-  - MIN_RMS = 0.002              (filters near-silent segments)
-  - MIN_SEGMENT_DURATION = 1.0s
-
-Because the validation set is already clean, WER capping is not needed
-and has been removed. A single corpus-level WER is reported per model/dataset
-pair, which is the standard metric and directly comparable to published numbers.
-
-normalize_for_wer() still applies NFC + danda-chain collapse + whitespace
-normalisation so reference and hypothesis are on equal footing.
-"""
-
 import os
 import sys
 import re
@@ -35,9 +16,6 @@ import jiwer
 from tqdm import tqdm
 
 
-# ============================================================================
-# Paths
-# ============================================================================
 
 def get_repo_root() -> Path:
     return Path(__file__).parent.parent
@@ -61,10 +39,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# GPU helpers
-# ============================================================================
-
 def setup_gpu(gpu_id: int = 0) -> None:
     if torch.cuda.is_available():
         total = torch.cuda.device_count()
@@ -85,22 +59,8 @@ def get_device(gpu_id: int = 0) -> torch.device:
     return torch.device(f"cuda:{gpu_id}")
 
 
-# ============================================================================
-# Text normalisation
-# ============================================================================
-
 def normalize_for_wer(text: str) -> str:
-    """
-    Applied identically to both reference and hypothesis before WER.
-
-    1. Unicode NFC normalisation — Devanagari combining characters can
-       represent the same glyph with different byte sequences; without this
-       jiwer reports false errors on visually identical strings.
-    2. Collapse runs of 2+ danda/period to a single danda, then strip all
-       trailing punctuation. Handles residual model danda-chain output without
-       the need for per-utterance capping.
-    3. Collapse whitespace.
-    """
+    
     text = unicodedata.normalize("NFC", text)
     text = re.sub(r'[।\.]{2,}', '।', text)
     text = text.rstrip('।. ').strip()
@@ -109,9 +69,6 @@ def normalize_for_wer(text: str) -> str:
     return text
 
 
-# ============================================================================
-# Model loading
-# ============================================================================
 
 def load_baseline_model(gpu_id: int = 0):
     logger.info("Loading baseline: openai/whisper-small")
@@ -156,11 +113,6 @@ def load_finetuned_model(gpu_id: int = 0):
     logger.info("Fine-tuned model loaded.")
     return model, processor, device
 
-
-# ============================================================================
-# Inference
-# ============================================================================
-
 def run_inference(
     model: WhisperForConditionalGeneration,
     processor: WhisperProcessor,
@@ -169,14 +121,7 @@ def run_inference(
     batch_size: int = 8,
     max_samples: Optional[int] = None,
 ) -> Tuple[List[str], List[str]]:
-    """
-    Batched inference. Returns (predictions, references) both normalised
-    via normalize_for_wer().
-
-    repetition_penalty and no_repeat_ngram_size are kept even on clean data —
-    they are cheap and prevent any residual loop generation on short segments
-    that may still appear in FLEURS (which uses its own, unfiltered, test set).
-    """
+   
     text_key = None
     for candidate in ("sentence", "raw_transcription", "transcription", "text"):
         if candidate in dataset.column_names:
@@ -233,10 +178,6 @@ def run_inference(
     return predictions, references
 
 
-# ============================================================================
-# WER computation
-# ============================================================================
-
 def compute_wer(predictions: List[str], references: List[str]) -> float:
     """Corpus-level WER. Empty references are filtered before computation."""
     pairs = [(r, p) for r, p in zip(references, predictions) if r.strip()]
@@ -261,11 +202,6 @@ def evaluate_on_dataset(
     wer = compute_wer(preds, refs)
     logger.info(f"  {dataset_name}  WER: {wer * 100:.2f}%")
     return wer
-
-
-# ============================================================================
-# Main
-# ============================================================================
 
 def main():
     parser = argparse.ArgumentParser(
