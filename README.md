@@ -147,7 +147,6 @@ All scripts are designed to run sequentially from the repo root. Each step depen
 bash scripts/00_install_deps.sh
 ```
 
-**Duration**: 5-10 minutes  
 **Output**: Python environment with all required packages
 
 ### Step 1: Download Data
@@ -163,7 +162,6 @@ python scripts/01_download_data.py --workers 8
 - Implements resume (skips existing files)
 - Logs errors to `data/download_errors.log`
 
-**Duration**: 30-45 minutes (depending on network)  
 **Output**: 
 - `data/raw_audio/` — 104 WAV files
 - `data/transcriptions/` — 104 JSON files
@@ -183,8 +181,7 @@ python scripts/02_preprocess.py
 - Cuts segments based on filtering criteria (see Preprocessing section)
 - Normalizes text (Unicode NFC, whitespace cleanup)
 - Generates manifest JSONL with metadata
-
-**Duration**: 10-15 minutes  
+  
 **Output**:
 - `data/segments/` — ~1000 WAV segment files
 - `data/segments_manifest.jsonl` — Manifest with audio paths, text, metadata
@@ -214,8 +211,7 @@ python scripts/03_make_hf_dataset.py
   - `sentence` column: normalized text
   - Metadata: `recording_id`, `duration`, `speaker_id`, `segment_idx`
 - Saves to Arrow format for efficient loading
-
-**Duration**: 5 minutes  
+ 
 **Output**:
 - `datasets_hf/train/` — Train dataset (90%, ~850 segments)
 - `datasets_hf/val/` — Validation dataset (10%, ~100 segments)
@@ -254,7 +250,6 @@ python scripts/04_train.py \
   - WER as best metric (saved to `models/whisper-small-hindi/best/`)
 - Logs to TensorBoard in `results/logs/tensorboard/`
 
-**Duration**: 3-5 hours (on 2× RTX A6000 GPUs)  
 **Output**:
 - `models/whisper-small-hindi/` — Full training outputs
 - `models/whisper-small-hindi/best/` — Best checkpoint (lowest validation WER)
@@ -282,21 +277,11 @@ python scripts/05_evaluate.py \
   - Our validation set (from fine-tuning data, ~100 samples)
 - Computes WER with consistent normalization
 - Saves results to `results/wer_table.csv`
-
-**Duration**: 20-30 minutes  
+ 
 **Output**:
 - `results/wer_table.csv` — Results table (CSV format)
 - `results/logs/evaluation.log` — Evaluation log
 - Results printed to console:
-
-```
-| Model                               | Dataset               | WER (%)  |
-|-------------------------------------|------------------------|---------:|
-| Whisper-small (baseline)            | FLEURS Hi test        | 32.45    |
-| Whisper-small (fine-tuned)          | FLEURS Hi test        | 28.12    |
-| Whisper-small (baseline)            | JoshTalks val         | 38.92    |
-| Whisper-small (fine-tuned)          | JoshTalks val         | 24.67    |
-```
 
 **Expected Improvements**:
 - Baseline → Fine-tuned on FLEURS: ~10-15% relative WER reduction
@@ -328,7 +313,6 @@ python scripts/06_error_analysis.py \
   - Other
 - Generates recommendations for fixes
 
-**Duration**: 15-20 minutes  
 **Output**:
 - `results/error_samples.jsonl` — 25 sampled errors with details:
   ```json
@@ -365,8 +349,7 @@ python scripts/07_fix_and_reeval.py
 - Applies fix to all 25 error samples
 - Computes before/after WER
 - Reports improvement statistics
-
-**Duration**: 2-3 minutes  
+ 
 **Output**:
 - `results/fix_results.json` — Summary of improvements:
   ```json
