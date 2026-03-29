@@ -1,0 +1,5 @@
+Model,Dataset,WER (%)
+Whisper-small (baseline),FLEURS Hi test,85.23
+Whisper-small (baseline),JoshTalks val,94.40
+Whisper-small (fine-tuned),FLEURS Hi test,73.29
+Whisper-small (fine-tuned),JoshTalks val,84.95

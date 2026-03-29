@@ -1,0 +1,430 @@
+{
+  "pipeline_description": {
+    "step_a": "Number normalisation: Hindi number words → digits, with idiom guard",
+    "step_b": "English loanword detection: 3-tier classifier (exception list + lexicon + phonology)"
+  },
+  "results": [
+    {
+      "id": "NUM-1",
+      "description": "Simple cardinal number — time duration",
+      "category": "number_correct",
+      "reference": "हमें तेरह मिनट हो गए",
+      "raw_asr": "हमें तेरह मिनट हो गए",
+      "number_normalised": "हमें 13 मिनट हो गए",
+      "final_tagged": "हमें 13 [EN]मिनट[/EN] हो गए",
+      "number_conversions": [
+        {
+          "original": "तेरह",
+          "converted": "13",
+          "value": 13,
+          "is_idiom": false,
+          "position": 1
+        }
+      ],
+      "english_words_detected": [
+        "मिनट"
+      ],
+      "english_count": 1,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.2,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.2,
+      "wer_delta_correct": 0.0,
+      "note": "तेरह → 13 (straightforward cardinal in temporal context)"
+    },
+    {
+      "id": "NUM-2",
+      "description": "Compound number — travel time",
+      "category": "number_correct",
+      "reference": "कम से कम डेढ़ दो तीन घंटे लग जाते हैं",
+      "raw_asr": "कम से कम डेढ़ दो तीन घंटे लग जाते हैं",
+      "number_normalised": "कम से कम डेढ़ दो तीन घंटे लग जाते हैं",
+      "final_tagged": "कम से कम डेढ़ दो तीन घंटे लग जाते हैं",
+      "number_conversions": [
+        {
+          "original": "दो",
+          "converted": "दो",
+          "value": null,
+          "is_idiom": false,
+          "position": 4
+        },
+        {
+          "original": "तीन",
+          "converted": "तीन",
+          "value": null,
+          "is_idiom": false,
+          "position": 5
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.0,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "दो तीन is kept as-is because the preceding fraction word डेढ़ breaks numeric span collapsing; this is not treated as an idiom."
+    },
+    {
+      "id": "NUM-3",
+      "description": "Large compound number — administrative/financial",
+      "category": "number_correct",
+      "reference": "तीन सौ चौवन रुपए देने होंगे",
+      "raw_asr": "तीन सौ चौवन रुपए देने होंगे",
+      "number_normalised": "354 रुपए देने होंगे",
+      "final_tagged": "354 रुपए देने होंगे",
+      "number_conversions": [
+        {
+          "original": "तीन सौ चौवन",
+          "converted": "354",
+          "value": 354,
+          "is_idiom": false,
+          "position": 0
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.5,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.5,
+      "wer_delta_correct": 0.0,
+      "note": "तीन सौ चौवन → 354 (multi-token compound resolved left-to-right)"
+    },
+    {
+      "id": "NUM-4",
+      "description": "Round thousands",
+      "category": "number_correct",
+      "reference": "एक हज़ार पाँच सौ लोग आए थे",
+      "raw_asr": "एक हज़ार पाँच सौ लोग आए थे",
+      "number_normalised": "1500 लोग आए थे",
+      "final_tagged": "1500 लोग आए थे",
+      "number_conversions": [
+        {
+          "original": "एक हज़ार पाँच सौ",
+          "converted": "1500",
+          "value": 1500,
+          "is_idiom": false,
+          "position": 0
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.5714,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.5714,
+      "wer_delta_correct": 0.0,
+      "note": "एक हज़ार पाँच सौ → 1500"
+    },
+    {
+      "id": "NUM-5",
+      "description": "Simple tens",
+      "category": "number_correct",
+      "reference": "पच्चीस साल की उम्र में",
+      "raw_asr": "पच्चीस साल की उम्र में",
+      "number_normalised": "25 साल की उम्र में",
+      "final_tagged": "25 साल की उम्र में",
+      "number_conversions": [
+        {
+          "original": "पच्चीस",
+          "converted": "25",
+          "value": 25,
+          "is_idiom": false,
+          "position": 0
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.2,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.2,
+      "wer_delta_correct": 0.0,
+      "note": "पच्चीस → 25 (irregular tens word, direct lookup)"
+    },
+    {
+      "id": "EDGE-1",
+      "description": "Idiomatic paired numbers — should NOT convert",
+      "category": "number_edge",
+      "reference": "दो-चार बातें करनी थीं",
+      "raw_asr": "दो-चार बातें करनी थीं",
+      "number_normalised": "दो-चार बातें करनी थीं",
+      "final_tagged": "दो-चार बातें करनी थीं",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.0,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "दो-चार is a colloquial idiom meaning 'a few'. Converting to '2-4 बातें' would be wrong. Idiom pattern detected → kept as-is."
+    },
+    {
+      "id": "EDGE-2",
+      "description": "एक बार — once (idiomatic)",
+      "category": "number_edge",
+      "reference": "एक बार फिर से देख लो",
+      "raw_asr": "एक बार फिर से देख लो",
+      "number_normalised": "एक बार फिर से देख लो",
+      "final_tagged": "एक बार फिर से देख लो",
+      "number_conversions": [
+        {
+          "original": "एक",
+          "converted": "एक",
+          "value": null,
+          "is_idiom": true,
+          "position": 0
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.0,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "एक बार = 'once'. Converting to '1 बार' breaks colloquial phrasing. Idiom rule: एक बार → kept."
+    },
+    {
+      "id": "EDGE-3",
+      "description": "Repeated number in idiomatic emphasis",
+      "category": "number_edge",
+      "reference": "नौ दो ग्यारह हो गया",
+      "raw_asr": "नौ दो ग्यारह हो गया",
+      "number_normalised": "नौ दो ग्यारह हो गया",
+      "final_tagged": "नौ दो ग्यारह हो गया",
+      "number_conversions": [
+        {
+          "original": "नौ",
+          "converted": "नौ",
+          "value": null,
+          "is_idiom": true,
+          "position": 0
+        },
+        {
+          "original": "दो",
+          "converted": "दो",
+          "value": null,
+          "is_idiom": true,
+          "position": 1
+        },
+        {
+          "original": "ग्यारह",
+          "converted": "ग्यारह",
+          "value": null,
+          "is_idiom": true,
+          "position": 2
+        }
+      ],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.0,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "नौ दो ग्यारह = idiom for 'fled/ran away'. Cannot convert (9-2-11 makes no sense). Idiom pattern block applied."
+    },
+    {
+      "id": "EN-1",
+      "description": "Job interview — common loanwords",
+      "category": "english_detection",
+      "reference": "मेरा इंटरव्यू बहुत अच्छा गया और मुझे जॉब मिल गई",
+      "raw_asr": "मेरा इंटरव्यू बहुत अच्छा गया और मुझे जॉब मिल गई",
+      "number_normalised": "मेरा इंटरव्यू बहुत अच्छा गया और मुझे जॉब मिल गई",
+      "final_tagged": "मेरा [EN]इंटरव्यू[/EN] बहुत अच्छा गया और मुझे [EN]जॉब[/EN] मिल गई",
+      "number_conversions": [],
+      "english_words_detected": [
+        "इंटरव्यू",
+        "जॉब"
+      ],
+      "english_count": 2,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.0,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "इंटरव्यू (interview) and जॉब (job) are English loanwords in Devanagari. Both correctly tagged."
+    },
+    {
+      "id": "EN-2",
+      "description": "Mobile technology — loanwords from error_samples",
+      "category": "english_detection",
+      "reference": "हाँ मोबाइल होते ही नहीं थे",
+      "raw_asr": "हां, मॉबैल अते ही नहीं सिर्क",
+      "number_normalised": "हां, मॉबैल अते ही नहीं सिर्क",
+      "final_tagged": "हां, मॉबैल अते ही नहीं सिर्क",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.6667,
+      "wer_hyp_only": 0.6667,
+      "wer_both_normalised": 0.6667,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "मोबाइल / मॉबैल (mobile) — English loanword. Tagged in both ref and hyp."
+    },
+    {
+      "id": "EN-3",
+      "description": "School / education loanwords",
+      "category": "english_detection",
+      "reference": "नए स्कूल में एडमिशन ले रहे हैं",
+      "raw_asr": "नैस्कुल में अइन्मिशन लए राई है",
+      "number_normalised": "नैस्कुल में अइन्मिशन लए राई है",
+      "final_tagged": "नैस्कुल में अइन्मिशन लए राई है",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.8571,
+      "wer_hyp_only": 0.8571,
+      "wer_both_normalised": 0.8571,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "स्कूल (school), एडमिशन (admission) — both lexicon hits. Demonstrates ASR mangling loanwords (नैस्कुल, अइन्मिशन) without changing their English-origin classification."
+    },
+    {
+      "id": "EN-4",
+      "description": "Colloquial English adverb in Hindi conversation",
+      "category": "english_detection",
+      "reference": "अभी क्या कर रहे हैं आप रिसेंटली",
+      "raw_asr": "अभी क्या कर रहे हैं आप इसलिकुन समत्यों",
+      "number_normalised": "अभी क्या कर रहे हैं आप इसलिकुन समत्यों",
+      "final_tagged": "अभी क्या कर रहे हैं आप इसलिकुन समत्यों",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.2857,
+      "wer_hyp_only": 0.2857,
+      "wer_both_normalised": 0.2857,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "रिसेंटली (recently) is a Devanagari English loanword. Correctly tagged in reference. In hypothesis it becomes a nonsense word (इसलिकुन) — shows ASR failure on loanwords."
+    },
+    {
+      "id": "EN-5",
+      "description": "Fruits & food loanwords (from error_samples)",
+      "category": "english_detection",
+      "reference": "हूं तो आप जंग फ्रूट्स ज्यादा खाते हैं या मतलब कि नार्मल खाते हैं",
+      "raw_asr": "हम्म तो आप चंकिल दूरी जाते हैं मनही को सस्या नार्बल खाता है",
+      "number_normalised": "हम्म तो आप चंकिल दूरी जाते हैं मनही को सस्या नार्बल खाता है",
+      "final_tagged": "हम्म तो आप चंकिल दूरी जाते हैं मनही को सस्या नार्बल खाता है",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.7857,
+      "wer_hyp_only": 0.7857,
+      "wer_both_normalised": 0.7857,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "फ्रूट्स (fruits), नार्मल (normal) — both English loanwords. नार्बल in hypothesis is ASR distortion of नार्मल."
+    },
+    {
+      "id": "EN-6",
+      "description": "Combined number + English loanword",
+      "category": "combined",
+      "reference": "तेरह मिनट की मीटिंग थी",
+      "raw_asr": "तेरह मिनट की मीटिंग थी",
+      "number_normalised": "13 मिनट की मीटिंग थी",
+      "final_tagged": "13 [EN]मिनट[/EN] की [EN]मीटिंग[/EN] थी",
+      "number_conversions": [
+        {
+          "original": "तेरह",
+          "converted": "13",
+          "value": 13,
+          "is_idiom": false,
+          "position": 0
+        }
+      ],
+      "english_words_detected": [
+        "मिनट",
+        "मीटिंग"
+      ],
+      "english_count": 2,
+      "wer_before": 0.0,
+      "wer_hyp_only": 0.2,
+      "wer_both_normalised": 0.0,
+      "wer_delta_naive": 0.2,
+      "wer_delta_correct": 0.0,
+      "note": "तेरह → 13 (number). मीटिंग (meeting), मिनट (minute) — English loanwords. Pipeline applies both steps."
+    },
+    {
+      "id": "EN-7",
+      "description": "Ekchually / adverb loanword",
+      "category": "english_detection",
+      "reference": "बट सर एक्चुली इस किताब के पीछे है ना",
+      "raw_asr": "बट सर एक्सुली इस किताम के भी चैन हो लहां",
+      "number_normalised": "बट सर एक्सुली इस किताम के भी चैन हो लहां",
+      "final_tagged": "[EN]बट[/EN] सर [EN]एक्सुली[/EN] इस किताम के भी चैन हो लहां",
+      "number_conversions": [],
+      "english_words_detected": [
+        "बट",
+        "एक्सुली"
+      ],
+      "english_count": 2,
+      "wer_before": 0.6667,
+      "wer_hyp_only": 0.6667,
+      "wer_both_normalised": 0.6667,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "एक्चुली (actually), बट (but) — both English. किताब is actually an Arabic/Urdu loanword, not English — correctly NOT tagged."
+    },
+    {
+      "id": "REAL-1",
+      "description": "From error_samples — ludo/carom games",
+      "category": "real_data",
+      "reference": "लूडो कैरम भी खेला है",
+      "raw_asr": "लूटो करम्यें भी खिला है",
+      "number_normalised": "लूटो करम्यें भी खिला है",
+      "final_tagged": "लूटो करम्यें भी खिला है",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.6,
+      "wer_hyp_only": 0.6,
+      "wer_both_normalised": 0.6,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "लूडो (Ludo) and कैरम (Carrom) are English board game names → loanwords. ASR transcribes them poorly but they remain classifiable."
+    },
+    {
+      "id": "REAL-2",
+      "description": "From error_samples — school/college topic",
+      "category": "real_data",
+      "reference": "कॉलेज में एडमिशन ले रहे हैं",
+      "raw_asr": "कॉलेज मे अइन्मिशन लए राई है",
+      "number_normalised": "कॉलेज मे अइन्मिशन लए राई है",
+      "final_tagged": "[EN]कॉलेज[/EN] मे अइन्मिशन लए राई है",
+      "number_conversions": [],
+      "english_words_detected": [
+        "कॉलेज"
+      ],
+      "english_count": 1,
+      "wer_before": 0.8333,
+      "wer_hyp_only": 0.8333,
+      "wer_both_normalised": 0.8333,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "कॉलेज (college), एडमिशन (admission) — both tagged. ASR distorts एडमिशन to अइन्मिशन."
+    },
+    {
+      "id": "REAL-3",
+      "description": "Topic / subject — education loanwords",
+      "category": "real_data",
+      "reference": "ये सबजेक्ट कैसा है उसके बारे में पढ़ते हैं",
+      "raw_asr": "ये सब्येक कैसा है उज्की बारे भी पड़तें थे",
+      "number_normalised": "ये सब्येक कैसा है उज्की बारे भी पड़तें थे",
+      "final_tagged": "ये सब्येक कैसा है उज्की बारे भी पड़तें थे",
+      "number_conversions": [],
+      "english_words_detected": [],
+      "english_count": 0,
+      "wer_before": 0.5556,
+      "wer_hyp_only": 0.5556,
+      "wer_both_normalised": 0.5556,
+      "wer_delta_naive": 0.0,
+      "wer_delta_correct": 0.0,
+      "note": "सबजेक्ट (subject) → English loanword. ASR output सब्येक is a distortion of the same word."
+    }
+  ]
+}

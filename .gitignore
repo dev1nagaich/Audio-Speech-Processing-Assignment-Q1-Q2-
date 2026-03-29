@@ -1,0 +1,83 @@
+# Data directories
+data/raw/
+data/processed/
+data/manifests/
+data
+datasets_hf
+
+# Model checkpoints and trained models
+models/
+models1/
+checkpoints/
+outputs/
+=0.29.0
+=2.18.0
+=4.40.0
+
+# HuggingFace cache
+.cache/
+huggingface/
+
+# Training outputs
+results/logs/
+results1/
+results2/
+results3/
+runs/
+
+# TensorBoard logs
+results/logs/tensorboard/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+myenv/
+venv/
+env/
+ENV/
+.venv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Pip
+*.egg-info/
+dist/
+build/
+
+# Misc
+*.log
+*.out
+.tmp/
+temp/
+
+CHECKLIST.md
+QUICKSTART.md
